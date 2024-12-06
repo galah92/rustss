@@ -1,34 +1,38 @@
-use feed_rs::parser;
+use clap::Parser;
 
-async fn fetch_last_articles(url: &str, count: usize) -> anyhow::Result<Vec<String>> {
-    let content = reqwest::get(url).await?.bytes().await?;
-    let feed = parser::parse(&content[..])?;
+#[derive(Parser)]
+#[command(
+    author = "rustss CLI",
+    version,
+    about = "A simple RSS/Atom feed reader",
+    long_about = "Fetch and display the latest articles from any RSS or Atom feed"
+)]
+struct Args {
+    #[arg(
+        short,
+        long,
+        help = "URL of the RSS/Atom feed to fetch",
+        default_value = "https://simonwillison.net/atom/everything/",
+        value_name = "FEED_URL"
+    )]
+    url: String,
 
-    Ok(feed
-        .entries
-        .iter()
-        .take(count)
-        .map(|entry| {
-            format!(
-                "{}: {}",
-                entry
-                    .title
-                    .as_ref()
-                    .map(|t| t.content.as_str())
-                    .unwrap_or_default(),
-                entry
-                    .links
-                    .first()
-                    .map(|l| l.href.as_str())
-                    .unwrap_or_default()
-            )
-        })
-        .collect())
+    #[arg(
+        short,
+        long,
+        help = "Number of articles to fetch",
+        default_value_t = 3,
+        value_name = "COUNT",
+        value_parser = clap::value_parser!(usize)
+    )]
+    count: usize,
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let articles = fetch_last_articles("https://simonwillison.net/atom/everything/", 3).await?;
+    let args = Args::parse();
+    let articles = rustss::fetch_last_articles(&args.url, args.count).await?;
+
     for article in articles {
         println!("{}", article);
     }
