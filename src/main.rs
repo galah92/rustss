@@ -7,7 +7,7 @@ use serde::Deserialize;
 struct IndexTemplate {
     url: String,
     count: usize,
-    articles: Vec<String>,
+    articles: Vec<rustss::Article>,
 }
 
 #[derive(Deserialize)]
@@ -22,10 +22,9 @@ async fn index(Query(params): Query<Params>) -> Html<String> {
         .unwrap_or_else(|| "https://simonwillison.net/atom/everything/".to_string());
     let count = params.count.unwrap_or(3);
 
-    let articles = match rustss::fetch_last_articles(&url, count).await {
-        Ok(articles) => articles.iter().map(|a| a.to_string()).collect(),
-        Err(_) => vec!["Error fetching feed".to_string()],
-    };
+    let articles = rustss::fetch_last_articles(&url, count)
+        .await
+        .unwrap_or_else(|_| vec![]);
 
     let template = IndexTemplate {
         url,

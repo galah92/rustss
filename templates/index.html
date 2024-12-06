@@ -1,24 +1,67 @@
-
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>RustSS Feed Reader</title>
     <style>
-        body { max-width: 800px; margin: 0 auto; padding: 20px; }
-        .article { margin-bottom: 20px; }
+        body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f5f5f5;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        input[type="text"] {
+            width: 60%;
+        }
     </style>
 </head>
+
 <body>
     <h1>RustSS Feed Reader</h1>
     <form method="GET">
-        <input type="text" name="url" value="{{ url }}" style="width: 60%">
+        <input type="text" name="url" value="{{ url }}">
         <input type="number" name="count" value="{{ count }}" min="1" max="50">
         <input type="submit" value="Fetch">
     </form>
-    {% for article in articles %}
-    <div class="article">
-        {{ article }}
-    </div>
-    {% endfor %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ article.title }}</td>
+                <td><a href="{{ article.url }}" target="_blank">{{ article.url }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
+
 </html>
