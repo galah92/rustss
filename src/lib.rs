@@ -1,6 +1,18 @@
 use feed_rs::parser;
 
-pub async fn fetch_last_articles(url: &str, count: usize) -> anyhow::Result<Vec<String>> {
+#[derive(Debug)]
+pub struct Article {
+    pub title: String,
+    pub url: String,
+}
+
+impl std::fmt::Display for Article {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: {}", self.title, self.url)
+    }
+}
+
+pub async fn fetch_last_articles(url: &str, count: usize) -> anyhow::Result<Vec<Article>> {
     let content = reqwest::get(url).await?.bytes().await?;
     let feed = parser::parse(&content[..])?;
 
@@ -8,20 +20,17 @@ pub async fn fetch_last_articles(url: &str, count: usize) -> anyhow::Result<Vec<
         .entries
         .iter()
         .take(count)
-        .map(|entry| {
-            format!(
-                "{}: {}",
-                entry
-                    .title
-                    .as_ref()
-                    .map(|t| t.content.as_str())
-                    .unwrap_or_default(),
-                entry
-                    .links
-                    .first()
-                    .map(|l| l.href.as_str())
-                    .unwrap_or_default()
-            )
+        .map(|entry| Article {
+            title: entry
+                .title
+                .as_ref()
+                .map(|t| t.content.clone())
+                .unwrap_or_default(),
+            url: entry
+                .links
+                .first()
+                .map(|l| l.href.clone())
+                .unwrap_or_default(),
         })
         .collect())
 }

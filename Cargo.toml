@@ -2,6 +2,14 @@
 name = "rustss"
 version = "0.1.0"
 edition = "2021"
+default-run = "rustss"
+
+[[bin]]
+name = "rustss"
+
+[[bin]]
+name = "rustss-cli"
+path = "src/bin/cli.rs"
 
 [dependencies]
 anyhow = "1.0.94"
@@ -9,3 +17,6 @@ feed-rs = "2.2.0"
 reqwest = "0.12.9"
 tokio = { version = "1.42.0", features = ["full"] }
 clap = { version = "4.4", features = ["derive"] }
+axum = "0.7"
+askama = "0.12"
+serde = { version = "1.0", features = ["derive"] }

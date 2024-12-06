@@ -1,0 +1,24 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RustSS Feed Reader</title>
+    <style>
+        body { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .article { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>RustSS Feed Reader</h1>
+    <form method="GET">
+        <input type="text" name="url" value="{{ url }}" style="width: 60%">
+        <input type="number" name="count" value="{{ count }}" min="1" max="50">
+        <input type="submit" value="Fetch">
+    </form>
+    {% for article in articles %}
+    <div class="article">
+        {{ article }}
+    </div>
+    {% endfor %}
+</body>
+</html>
