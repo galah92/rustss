@@ -10,12 +10,13 @@ struct IndexTemplate {
     articles: Vec<rustss::Article>,
 }
 
-#[derive(Deserialize)]
-pub struct Params {
+#[derive(Deserialize, Debug)]
+struct Params {
     url: Option<String>,
     count: Option<usize>,
 }
 
+#[tracing::instrument]
 async fn index(Query(params): Query<Params>) -> Html<String> {
     let url = params
         .url
@@ -40,10 +41,15 @@ async fn index(Query(params): Query<Params>) -> Html<String> {
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt::init();
+
     let app = Router::new().route("/", get(index));
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
-        .await
-        .unwrap();
+    let ip = std::env::var("IP").unwrap_or("127.0.0.1".to_string());
+    let port = std::env::var("PORT").unwrap_or("3000".to_string());
+    let addr = format!("{}:{}", ip, port);
+
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+    tracing::info!("Listening on {}", addr);
     axum::serve(listener, app).await.unwrap();
 }
