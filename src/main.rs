@@ -1,43 +1,6 @@
 use askama::Template;
-use axum::{extract::Query, response::Html, routing::get, Router};
+use axum::{extract::Query, routing::get, Router};
 use serde::Deserialize;
-
-#[derive(Template)]
-#[template(path = "index.html")]
-struct IndexTemplate {
-    url: String,
-    count: usize,
-    articles: Vec<rustss::Article>,
-}
-
-#[derive(Deserialize, Debug)]
-struct Params {
-    url: Option<String>,
-    count: Option<usize>,
-}
-
-#[tracing::instrument]
-async fn index(Query(params): Query<Params>) -> Html<String> {
-    let url = params
-        .url
-        .unwrap_or_else(|| "https://simonwillison.net/atom/everything/".to_string());
-    let count = params.count.unwrap_or(3);
-
-    let articles = rustss::fetch_last_articles(&url, count)
-        .await
-        .unwrap_or_else(|_| vec![]);
-
-    let template = IndexTemplate {
-        url,
-        count,
-        articles,
-    };
-    Html(
-        template
-            .render()
-            .unwrap_or_else(|_| "Template error".to_string()),
-    )
-}
 
 #[tokio::main]
 async fn main() {
@@ -52,4 +15,37 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     tracing::info!("Listening on {}", addr);
     axum::serve(listener, app).await.unwrap();
+}
+
+#[tracing::instrument]
+async fn index(Query(params): Query<IndexParams>) -> axum::response::Result<IndexTemplate> {
+    let url = params
+        .url
+        .unwrap_or_else(|| "https://simonwillison.net/atom/everything/".to_string());
+    let count = params.count.unwrap_or(3);
+
+    let articles = rustss::fetch_last_articles(&url, count)
+        .await
+        .unwrap_or(vec![]);
+
+    let template = IndexTemplate {
+        url,
+        count,
+        articles,
+    };
+    Ok(template)
+}
+
+#[derive(Deserialize, Debug)]
+struct IndexParams {
+    url: Option<String>,
+    count: Option<usize>,
+}
+
+#[derive(Template)]
+#[template(path = "index.html")]
+struct IndexTemplate {
+    url: String,
+    count: usize,
+    articles: Vec<rustss::Article>,
 }
