@@ -17,7 +17,7 @@ feed-rs = "2.3.1"
 reqwest = "0.12.9"
 tokio = { version = "1.43.0", features = ["full"] }
 clap = { version = "4.5", features = ["derive"] }
-axum = "0.7"
+axum = "0.8"
 askama = { version = "0.12", features = ["with-axum"] }
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4.22"
